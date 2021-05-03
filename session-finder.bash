@@ -53,8 +53,11 @@ session_finder() {
 	fzf_out=$($tmux ls -F '#{?session_attached,0,1} #{?session_last_attached,,0}#{session_last_attached} #{?session_attached,*, } #{session_name}' \
     | sort -r \
     | perl -pe 's/^[01] [0-9]+ //' \
-    | fzf --print-query --prompt="$prompt" \
-    || true)
+    | sed 's/*/❖/g' \
+    | fzf --print-query --prompt="$prompt" --border=rounded \
+        --margin=25% --padding=5% --prompt='  • ' --pointer=' ' \
+        --color='bg+:-1,fg+:39,hl+:33,fg:248,hl:243,info:239' \
+		|| true)
 	line_count=$(echo "$fzf_out" | wc -l)
 	session_name="$(echo "$fzf_out" | tail -n1 | perl -pe 's/^[\* ] //')"
 	command=$(echo "$session_name" | awk '{ print $1 }')

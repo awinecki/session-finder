@@ -53,17 +53,18 @@ session_next() {
 get_fzf_out() {
 	fzf_out=$(
 		$tmux ls -F '#{?session_attached,◎, } #{session_name}' \
+		| sort -r \
     | fzf --print-query --prompt="$prompt" --border=rounded \
         --margin=15% --padding=3% --prompt='  ◎ ' --pointer=' ' \
 				--info=hidden \
         --color='bg+:-1,fg+:114,hl+:36,fg:248,hl:243,info:239,header:65' \
 				--preview='fortune | cowsay -f moose | lolcat' \
 	|| true)
-	echo $fzf_out
+	echo "$fzf_out"
 }
 
 session_finder() {
-	fzf_out=$(get_fzf_out)
+	local fzf_out=$(get_fzf_out)
 	line_count=$(echo "$fzf_out" | wc -l)
 	session_name="$(echo "$fzf_out" | tail -n1 | perl -pe 's/^[\* ] //')"
 	command=$(echo "$session_name" | awk '{ print $1 }')

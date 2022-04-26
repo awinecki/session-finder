@@ -4,6 +4,7 @@ cmd=$1
 prompt="find/create session> "
 tmux='/usr/bin/env tmux'
 debug=
+CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 if [ "$cmd" = "debug" ]; then
 	debug=true
@@ -49,15 +50,20 @@ session_next() {
 	} || true
 }
 
-session_finder() {
-	fzf_out=$($tmux ls -F '#{?session_attached,0,1} #{?session_last_attached,,0}#{session_last_attached} #{?session_attached,*, } #{session_name}' \
-    | sort -r \
-    | perl -pe 's/^[01] [0-9]+ //' \
-    | sed 's/*/❖/g' \
+get_fzf_out() {
+	fzf_out=$(
+		$tmux ls -F '#{?session_attached,◎, } #{session_name}' \
     | fzf --print-query --prompt="$prompt" --border=rounded \
-        --margin=25% --padding=5% --prompt='  • ' --pointer=' ' \
-        --color='bg+:-1,fg+:39,hl+:33,fg:248,hl:243,info:239' \
-		|| true)
+        --margin=15% --padding=3% --prompt='  ◎ ' --pointer=' ' \
+				--info=hidden \
+        --color='bg+:-1,fg+:114,hl+:36,fg:248,hl:243,info:239,header:65' \
+				--preview='fortune | cowsay -f moose | lolcat' \
+	|| true)
+	echo $fzf_out
+}
+
+session_finder() {
+	fzf_out=$(get_fzf_out)
 	line_count=$(echo "$fzf_out" | wc -l)
 	session_name="$(echo "$fzf_out" | tail -n1 | perl -pe 's/^[\* ] //')"
 	command=$(echo "$session_name" | awk '{ print $1 }')

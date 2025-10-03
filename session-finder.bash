@@ -54,11 +54,13 @@ get_fzf_out() {
 	fzf_out=$(
 		$tmux ls -F '#{?session_attached,◎, } #{session_name}' \
 		| sort -r \
-    | fzf --print-query --prompt="$prompt" --border=rounded \
-        --margin=15% --padding=3% --prompt='  ◎ ' --pointer=' ' \
+    | fzf --print-query --prompt="$prompt" \
+		    --border=none \
+        --margin=0% --padding=3% --prompt='  ◎ ' --pointer=' ' \
 				--info=hidden \
         --color='bg+:-1,fg+:114,hl+:36,fg:248,hl:243,info:239,header:65' \
-				--preview='fortune | cowsay -f moose | lolcat' \
+				--preview-window="right:80%" \
+				--preview='fortune' \
 	|| true)
 	echo "$fzf_out"
 }
